@@ -4,9 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.appcompat.view.menu.MenuView.ItemView
 import androidx.recyclerview.widget.RecyclerView
-import com.kashiflab.scopedstorage.PhotoClickListener
+import com.kashiflab.scopedstorage.data.listeners.PhotoClickListener
 import com.kashiflab.scopedstorage.R
 import com.kashiflab.scopedstorage.data.model.InternalStorageFiles
 

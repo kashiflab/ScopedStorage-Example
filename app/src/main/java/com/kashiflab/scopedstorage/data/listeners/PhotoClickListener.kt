@@ -1,4 +1,4 @@
-package com.kashiflab.scopedstorage
+package com.kashiflab.scopedstorage.data.listeners
 
 interface PhotoClickListener {
     fun onPhotoLongClick(fileName: String)

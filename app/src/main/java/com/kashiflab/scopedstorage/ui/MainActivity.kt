@@ -8,9 +8,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.kashiflab.scopedstorage.MainViewModel
+import com.kashiflab.scopedstorage.ui.viewmodel.MainViewModel
 import com.kashiflab.scopedstorage.data.utils.MediaUtils
-import com.kashiflab.scopedstorage.PhotoClickListener
+import com.kashiflab.scopedstorage.data.listeners.PhotoClickListener
 import com.kashiflab.scopedstorage.ui.adapter.PhotosAdapter
 import com.kashiflab.scopedstorage.databinding.ActivityMainBinding
 import java.util.UUID
@@ -22,6 +22,13 @@ class MainActivity : AppCompatActivity(), PhotoClickListener {
 
     private val mainViewModel: MainViewModel by lazy {
         ViewModelProvider(this)[MainViewModel::class.java]
+    }
+
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()){
+        it?.let { it1 ->
+            mainViewModel.savePhotoInInternalStorage(UUID.randomUUID().toString(), it1)
+
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,24 +43,21 @@ class MainActivity : AppCompatActivity(), PhotoClickListener {
 
         mainViewModel.photos.observe(this, Observer {
             adapter.setInternalStorageFiles(it)
-
         })
 
-        val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()){
-            it?.let { it1 ->
-                val isSaved = MediaUtils.savePhotoInInternalStorage(
-                    this, UUID.randomUUID().toString(),
-                    it1
-                )
-
-                if(isSaved){
-                    Toast.makeText(this,"Saved", Toast.LENGTH_SHORT).show()
-                    loadPhotos()
-                }else{
-                    Toast.makeText(this,"Failed", Toast.LENGTH_SHORT).show()
-                }
+        mainViewModel.saved.observe(this, Observer {
+            if(it){
+                Toast.makeText(this,"Saved", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this,"Failed", Toast.LENGTH_SHORT).show()
             }
-        }
+        })
+
+        mainViewModel.deleted.observe(this, Observer {
+            if(it){
+                Toast.makeText(this,"Deleted", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         binding.takePicture.setOnClickListener {
             takePicture.launch(null)
@@ -61,12 +65,7 @@ class MainActivity : AppCompatActivity(), PhotoClickListener {
 
     }
 
-    private fun loadPhotos(){
-        mainViewModel.loadPhotosFromInternalStorage()
-    }
-
-
     override fun onPhotoLongClick(fileName: String) {
-        MediaUtils.deletePhotoFromInternalStorage(this, fileName)
+        mainViewModel.deletePhotoInInternalStorage(fileName)
     }
 }
